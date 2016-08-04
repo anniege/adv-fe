@@ -1,0 +1,12 @@
+{
+  "name": "adv-fe",
+  "version": "1.0.0",
+  "scripts": {
+    "start": ""
+  },
+  "devDependencies": {
+    "gulp": "^3.x.x",
+    "gulp-clean": "^0.3.x",
+    "run-sequence": "^1.x.x"
+  }
+}

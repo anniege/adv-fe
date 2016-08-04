@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test</title>
+  <style>
+    .posts-table > div {
+      padding: 15px 10px;
+    }
+
+    .post-stripped {
+      background-color: lightGrey;
+    }
+  </style>
+</head>
+<body>
+  <div class="posts-json">
+
+  </div>
+  <div class="posts-table">
+
+  </div>
+
+  <script id="posts-json-template" type="text/x-handlebars-template">
+    {{json posts}}
+  </script>
+
+  <script id="posts-table-template" type="text/x-handlebars-template">
+    {{#table posts}}
+      {{description}}
+    {{/table}}
+  </script>
+  
+  <script src="libs/jquery/dist/jquery.js"></script>
+  <script src="libs/handlebars/handlebars.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/test.js"></script>
+</body>
+</html>
