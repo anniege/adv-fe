@@ -14,8 +14,8 @@
       console.log(posts);
 
       return posts.map((post, i) => {
-        let openTag = "<div>";
-        if (i%2 === 0) openTag = "<div class=\"post-stripped\">";
+        let openTag = "<div class=\"post-stripped\">";
+        if (i%2) openTag = "<div>";
 
         return new Handlebars.SafeString(
           openTag + post.description + "</div>"
