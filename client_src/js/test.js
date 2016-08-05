@@ -7,12 +7,10 @@
   Handlebars.registerHelper({
     json: (posts) => {
       return new Handlebars.SafeString(
-        "<pre>" + JSON.stringify(posts, null, 4)  + "</pre>"
+        "<pre>" +  Handlebars.Utils.escapeExpression(JSON.stringify(posts, null, 4))  + "</pre>"
       );
     },
     table: (posts, options) => {
-      console.log(posts);
-
       return posts.map((post, i) => {
         let openTag = "<div class=\"post-stripped\">";
         if (i%2) openTag = "<div>";
