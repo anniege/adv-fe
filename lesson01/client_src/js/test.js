@@ -7,16 +7,16 @@
   Handlebars.registerHelper({
     json: (posts) => {
       return new Handlebars.SafeString(
-        "<pre>" +  Handlebars.Utils.escapeExpression(JSON.stringify(posts, null, 4))  + "</pre>"
+        `<pre> ${Handlebars.Utils.escapeExpression(JSON.stringify(posts, null, 4))} </pre>`
       );
     },
     table: (posts, options) => {
       return posts.map((post, i) => {
-        let openTag = "<div class=\"post-stripped\">";
-        if (i%2) openTag = "<div>";
+        let customClass = '';
+        if (i%2) customClass = 'class="post-stripped"';
 
         return new Handlebars.SafeString(
-          openTag + post.description + "</div>"
+          `<div ${customClass}> ${post.description} </div>`
         );
       }).join("");
     }
