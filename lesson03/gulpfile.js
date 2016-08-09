@@ -109,7 +109,7 @@ gulp.task('images:build', () => {
   .pipe(gulp.dest(path.build.img));
 });
 
-gulp.task('iconfont:build', function(){
+gulp.task('iconfont:build', () => {
   return gulp.src([path.src.svg])
   .pipe(iconfont({
     fontName: 'myfont',
