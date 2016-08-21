@@ -1,6 +1,5 @@
 var Bar = require('components/bar/bar.js');
 var TuneControls = require('components/tune-controls/tune-controls.js');
-// var Resource = require('model/resource.js');
 
 module.exports = function GiftTunner(options) {
     var elem = $('<div></div>');
@@ -18,7 +17,7 @@ module.exports = function GiftTunner(options) {
     function render() {
         elem.html(App.templates['gift-tunner']({}));
 
-        elem.find('.gift-tunner__name').html(options.name);
+        elem.find('.gift-tunner__name').html(resource.getName());
         elem.find('.gift-tunner__bar').html(bar.render().elem);
         elem.find('.gift-tunner__controls').html(controls.render().elem);
 
@@ -27,9 +26,6 @@ module.exports = function GiftTunner(options) {
 
     return {
         render: render,
-        getCount: function() {
-            return bar.getCount();
-        },
         elem: elem
     }
 };

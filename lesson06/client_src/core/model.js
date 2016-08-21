@@ -1,4 +1,4 @@
-// (function (global) {
+(function (global) {
     function Model() {
        this.attributes = {};
        this.subscribers = [];
@@ -25,14 +25,11 @@
             console.log('init');
         }
     };
-
-    // global.Model = Model;
     Model.subscribeAll = function(models, cb) {
         models.forEach(function(model) {
             model.subscribe(cb);
         });
     };
-
     Model.createModel = function(custom) {
        var child = function() {
            return Model.apply(this, arguments);
@@ -40,6 +37,6 @@
        child.prototype = $.extend({}, Model.prototype, custom);
        return child;
     };
+    global.Model = Model;
 
-
-// })(window);
+})(window);

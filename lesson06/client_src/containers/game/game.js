@@ -6,7 +6,7 @@ module.exports = function Game() {
     var elem = $('<div></div>');
 
     var userGoldResource = new Resource({
-        count: 20,
+        count: 10,
         name: 'Gold'
     });
 
@@ -16,8 +16,8 @@ module.exports = function Game() {
     });
 
     var userSomeResource = new Resource({
-        count: 30,
-        name: 'Copper'
+        count: 20,
+        name: 'Some'
     });
 
     var userWealth = new UserWealth({
@@ -34,7 +34,6 @@ module.exports = function Game() {
 
     function render () {
         elem.html(App.templates['game']({}));
-
         elem.find('.game__user-wealth').html( userWealth.render().elem);
         elem.find('.game__god-gift-form').html( godGiftForm.render().elem);
 

@@ -22,7 +22,7 @@ this["App"]["templates"]["tune-controls"] = Handlebars.template({"compiler":[6,"
     return "<div class=\"tune-controls\">\n    <div class=\"button tune-controls__dec\">-</div>\n    <div class=\"button tune-controls__inc\">+</div>\n</div>\n";
 },"useData":true});
 this["App"]["templates"]["game"] = Handlebars.template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-    return "<div class=\"game\">\n  <div class=\"game_user-wealth\"></div>\n  <div class=\"game_god-gift-form\"></div>\n</div>\n";
+    return "<div class=\"game\">\n  <div class=\"game__user-wealth\"></div>\n  <div class=\"game__god-gift-form\"></div>\n</div>\n";
 },"useData":true});
 this["App"]["templates"]["gift-tunner"] = Handlebars.template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
     return "<div class=\"gift-tunner\">\n    <div class=\"gift-tunner__name\"></div>\n    <div class=\"gift-tunner__bar\"></div>\n    <div class=\"gift-tunner__controls\"></div>\n</div>\n";
