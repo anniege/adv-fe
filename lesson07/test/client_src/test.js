@@ -18,7 +18,7 @@ function postsLikesTotal() {
     let value = posts.reduce((sum, post) => {
       return sum + post.likeCount;
     }, 0);
-    $('.likes_count').html(value);
+    $('.likes__count').html(value);
   });
 }
 
@@ -40,7 +40,8 @@ function updateLikes() {
   promiselikesUpdate.then((post) => {
     return post.json()
   }).then((post) => {
-    $('.post_likes').html(post.likeCount);
+    $('.post__likes').html(post.likeCount);
+    postsLikesTotal();
   }).catch((reason) => {
     console.log('Error: ', reason)
   });
@@ -50,7 +51,7 @@ function updateLikes() {
 function getLikesAndComments() {
   getDataJSON(POST_PATH)
   .then((post) => {
-    $('.post_likes').html(post.likeCount);
+    $('.post__likes').html(post.likeCount);
     return post;
   })
   .then(({ comments }) => {
@@ -76,11 +77,9 @@ function getLikesAndComments() {
 
 $(document).ready(function(){
   getLikesAndComments();
+  postsLikesTotal();
 
-  $(".post_btn").click(function(){
+  $(".post__btn").click(function(){
     updateLikes();
-  });
-  $(".likes_btn").click(function(){
-    postsLikesTotal();
   });
 });
