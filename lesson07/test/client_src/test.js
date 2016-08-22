@@ -12,7 +12,7 @@ function getDataJSON(url) {
 }
 
 
-function postsLikesTotal() {
+function updateLikesTotal() {
   getDataJSON(POSTS_PATH)
   .then((posts) => {
     let value = posts.reduce((sum, post) => {
@@ -36,12 +36,11 @@ function updateLikes() {
       })
     });
   });
-
   promiselikesUpdate.then((post) => {
     return post.json()
   }).then((post) => {
     $('.post__likes').html(post.likeCount);
-    postsLikesTotal();
+    updateLikesTotal();
   }).catch((reason) => {
     console.log('Error: ', reason)
   });
@@ -77,7 +76,7 @@ function getLikesAndComments() {
 
 $(document).ready(function(){
   getLikesAndComments();
-  postsLikesTotal();
+  updateLikesTotal();
 
   $(".post__btn").click(function(){
     updateLikes();
