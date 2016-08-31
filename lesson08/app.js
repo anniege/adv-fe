@@ -76,7 +76,6 @@ app.delete(router('/posts/:postId'), (req, res) => {
 
 //render functions
 function renderGetRequest(req, res) {
-  'use strict';
   let dirPath = modifiedfilePath(req, '');
 
   readDir(dirPath).then((allFiles) => {
@@ -116,7 +115,6 @@ function renderGetRequest(req, res) {
 }
 
 function renderPostRequest(req, res) {
-  'use strict';
   let data = JSON.stringify(req.body);
   let dirPath = ((req.path).indexOf('users') > 0) ? modifiedfilePath(req, req.body.pop().id) : modifiedfilePath(req, req.body.pop().postId);
 
@@ -150,7 +148,6 @@ function renderPostRequest(req, res) {
 
 
 function renderPutRequest(req, res) {
-  'use strict';
   let filePath = modifiedfilePath(req, '/get.json');
   let data = JSON.stringify(req.body);
 
@@ -179,7 +176,6 @@ function renderPutRequest(req, res) {
 
 
   function renderDeleteRequest(req, res) {
-    'use strict';
     let dirPath = modifiedfilePath(req, '');
 
     stat(dirPath).then((stats) => {
@@ -203,7 +199,6 @@ function renderPutRequest(req, res) {
   }
 
   function modifiedfilePath(req, opts) {
-    'use strict';
     let options = opts || '';
     return path.join(__dirname, req.path, '/', options).replace('/' + apiVersion + '/', '/');
   }
