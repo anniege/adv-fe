@@ -33,45 +33,40 @@ app.get('/', (req, res) => {
   res.send('<html><body><h1>My web app http API! Version ' + apiVersion + '</h1></body></html>');
 });
 
-
 //requests to get all users or posts
-app.get(router('/users'), (req, res) => {
-  renderGetRequest(req, res);
-});
+app.route(router('/users'))
+  .get((req, res) => {
+    renderGetRequest(req, res);
+  })
+  .post((req, res) => {
+    renderPostRequest(req, res);
+  });
 
-app.get(router('/posts'), (req, res) => {
-  renderGetRequest(req, res);
-});
-
-
-//requests to add new user or post
-app.post(router('/users'), (req, res) => {
-  renderPostRequest(req, res);
-});
-
-app.post(router('/posts'), (req, res) => {
-  renderPostRequest(req, res);
-});
+app.route(router('/posts'))
+  .get((req, res) => {
+    renderGetRequest(req, res);
+  })
+  .post((req, res) => {
+    renderPostRequest(req, res);
+  });
 
 
 //request to update particular user or post
-app.put(router('/users/:id'), (req, res) => {
-  renderPutRequest(req, res);
-});
+app.route(router('/users/:id'))
+  .put((req, res) => {
+    renderPutRequest(req, res);
+  })
+  .delete((req, res) => {
+    renderDeleteRequest(req, res);
+  });
 
-app.put(router('/posts/:postId'), (req, res) => {
-  renderPutRequest(req, res);
-});
-
-
-//requests to delete particular user or post
-app.delete(router('/users/:id'), (req, res) => {
-  renderDeleteRequest(req, res);
-});
-
-app.delete(router('/posts/:postId'), (req, res) => {
-  renderDeleteRequest(req, res);
-});
+app.route(router('/posts/:postId'))
+  .put((req, res) => {
+    renderPutRequest(req, res);
+  })
+  .delete((req, res) => {
+    renderDeleteRequest(req, res);
+  });
 
 
 //render functions
