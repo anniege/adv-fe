@@ -65,9 +65,10 @@ function renderCommonRequest(req, res) {
   }
 }
 
-//render functions
+
+//GET request
 function renderGetRequest(req, res) {
-  let dirPath = modifiedfilePath(req, '');
+  let dirPath = modifiedfilePath(req);
   let id = req.params.id;
 
   if (id !== undefined) {
@@ -117,7 +118,7 @@ function renderGetRequest(req, res) {
   }
 }
 
-
+// POST request
 function renderPostRequest(req, res) {
   let data = JSON.stringify(req.body);
   let dirPath = (req.params.common === 'users') ? modifiedfilePath(req, req.body.pop().id) : modifiedfilePath(req, req.body.pop().postId);
@@ -148,7 +149,7 @@ function renderPostRequest(req, res) {
   });
 }
 
-
+//PUT request
 function renderPutRequest(req, res) {
   let filePath = modifiedfilePath(req, '/get.json');
   let data = JSON.stringify(req.body);
@@ -174,9 +175,9 @@ function renderPutRequest(req, res) {
   });
 }
 
-
+//DELETE request
 function renderDeleteRequest(req, res) {
-  let dirPath = modifiedfilePath(req, '');
+  let dirPath = modifiedfilePath(req);
 
   stat(dirPath).then((stats) => {
 
@@ -196,8 +197,11 @@ function renderDeleteRequest(req, res) {
   });
 }
 
+
 function modifiedfilePath(req, opts) {
+  console.log(opts);
   let options = opts || '';
+  console.log(options);
   return path.join(__dirname, req.path, '/', options).replace('/' + apiVersion + '/', '/');
 }
 
