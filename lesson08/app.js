@@ -2,22 +2,22 @@
 const express = require( 'express' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const url = require( 'url' );
 const bodyParser = require( 'body-parser' );
 const apiVersion = require( './package' ).version;
 const promisify = require( './promisify' );
 const rimraf = require( 'rimraf' );
 
-const readDir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 const read = promisify(fs.readFile);
+const readDir = promisify(fs.readdir);
 const mkdir = promisify(fs.mkdir);
 const rmdir = promisify(fs.rmdir);
-const readStream = promisify(fs.createWriteStream);
 
 let app = express();
 
 let router = (route) => '/api/'+ apiVersion + route;
+
+let commonUrl = ['users', 'posts'];
 
 app.set('port', 8080);
 app.listen(app.get('port'), () => {
@@ -27,98 +27,105 @@ app.listen(app.get('port'), () => {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 //default
 app.get('/', (req, res) => {
   res.send('<html><body><h1>My web app http API! Version ' + apiVersion + '</h1></body></html>');
 });
 
-//requests to get all users or posts
-app.route(router('/users'))
-  .get((req, res) => {
-    renderGetRequest(req, res);
-  })
-  .post((req, res) => {
-    renderPostRequest(req, res);
-  });
+app.all(router('/:common/((:id)?)'), (req, res) => { renderCommonRequest(req, res) });
 
-app.route(router('/posts'))
-  .get((req, res) => {
-    renderGetRequest(req, res);
-  })
-  .post((req, res) => {
-    renderPostRequest(req, res);
-  });
+function renderCommonRequest(req, res) {
+  let common = req.params.common;
+  let id = req.params.id;
+  let httpMethod = req.method.toLowerCase();
 
-
-//request to update particular user or post
-app.route(router('/users/:id'))
-  .put((req, res) => {
-    renderPutRequest(req, res);
-  })
-  .delete((req, res) => {
-    renderDeleteRequest(req, res);
-  });
-
-app.route(router('/posts/:postId'))
-  .put((req, res) => {
-    renderPutRequest(req, res);
-  })
-  .delete((req, res) => {
-    renderDeleteRequest(req, res);
-  });
-
+  if (common === 'users' || common === 'posts') {
+    switch (httpMethod) {
+      case 'get':
+      renderGetRequest(req, res);
+      break;
+      case 'post':
+      if (id === undefined) {
+        renderPostRequest(req, res);
+      } else renderFailStatus(res, 405);
+      break;
+      case 'put':
+      renderPutRequest(req, res);
+      break;
+      case 'delete':
+      if (id !== undefined) {
+        renderDeleteRequest(req, res);
+      } else renderFailStatus(res, 405);
+      break;
+      default:
+      renderFailStatus(res, 405);
+    }
+  } else {
+    renderFailStatus(res, 404);
+  }
+}
 
 //render functions
 function renderGetRequest(req, res) {
   let dirPath = modifiedfilePath(req, '');
+  let id = req.params.id;
 
-  readDir(dirPath).then((allFiles) => {
-    if (allFiles.length) {
+  if (id !== undefined) {
+    let fileName = path.join(dirPath, '/get.json');
 
-      let promises = [];
-      allFiles.forEach((file) => {
-        let filePath = path.join(dirPath, file);
+    stat(fileName).then((stats) => {
+      if (stats.isFile()) {
+        let stream = fs.createReadStream(fileName);
+        stream.pipe(res);
+      }
+    }, (reason) => {
+      renderFailStatus(res, 404);
+    });
+  } else {
+    readDir(dirPath).then((allFiles) => {
+      if (allFiles.length) {
 
-        let promise = stat(filePath).then((stats) => {
-          if (stats.isDirectory()) {
-            return filePath  + '/' + req.method.toLowerCase() + '.json';
-          }
+        let promises = [];
+        allFiles.forEach((file) => {
+          let filePath = path.join(dirPath, file);
+
+          let promise = stat(filePath).then((stats) => {
+            if (stats.isDirectory()) {
+              return filePath  + '/' + req.method.toLowerCase() + '.json';
+            }
+          });
+          promises.push(promise);
         });
-        promises.push(promise);
-      });
 
-      Promise.all(promises).then((paths) => {
-        res.setHeader('content-type', 'application/json');
+        Promise.all(promises).then((paths) => {
+          res.setHeader('content-type', 'application/json');
 
-        let promisesPaths = [];
-        paths.forEach((path) => {
-          if (path) promisesPaths.push(read(path))
+          let promisesPaths = [];
+          paths.forEach((path) => {
+            if (path) promisesPaths.push(read(path))
+          });
+
+          Promise.all(promisesPaths).then((filesBuffer) => {
+            let filesContentArray = filesBuffer.map((buff) => JSON.parse(buff.toString('utf8')).pop());
+            res.status(200).json(filesContentArray).end();
+          });
         });
-
-        Promise.all(promisesPaths).then((filesBuffer) => {
-          let filesContentArray = filesBuffer.map((buff) => JSON.parse(buff.toString('utf8')).pop());
-          res.status(200).json(filesContentArray).end();
-        });
-      });
-    }
-  }, (reson) => {
-    res.status(404).json([{
-      "status": "fail"
-    }]).end();
-  });
+      }
+    }, (reson) => {
+      renderFailStatus(res, 404);
+    });
+  }
 }
+
 
 function renderPostRequest(req, res) {
   let data = JSON.stringify(req.body);
-  let dirPath = ((req.path).indexOf('users') > 0) ? modifiedfilePath(req, req.body.pop().id) : modifiedfilePath(req, req.body.pop().postId);
+  let dirPath = (req.params.common === 'users') ? modifiedfilePath(req, req.body.pop().id) : modifiedfilePath(req, req.body.pop().postId);
 
   stat(dirPath).then((stats) => {
 
     if (stats.isDirectory()) {
-      res.status(409).json([{
-        "status": "fail"
-      }]).end();
+      renderFailStatus(res, 409);
     }
 
   }, (reason) => {
@@ -163,37 +170,39 @@ function renderPutRequest(req, res) {
 
     }
   }, (reason) => {
-      res.status(404).json([{
-        "status": "fail"
-      }]).end();
+    renderFailStatus(res, 404);
   });
 }
 
 
-  function renderDeleteRequest(req, res) {
-    let dirPath = modifiedfilePath(req, '');
+function renderDeleteRequest(req, res) {
+  let dirPath = modifiedfilePath(req, '');
 
-    stat(dirPath).then((stats) => {
+  stat(dirPath).then((stats) => {
 
-      if (stats.isDirectory()) {
+    if (stats.isDirectory()) {
 
-        rimraf(dirPath, (err) => {
-          if (err) console.error(`Error: ${err}`);
+      rimraf(dirPath, (err) => {
+        if (err) console.error(`Error: ${err}`);
 
-          res.status(200).json([{
-            "status": "success"
-          }]).end();
-        });
-
-      }
-    }, (reason) => {
-        res.status(404).json([{
-          "status": "fail"
+        res.status(200).json([{
+          "status": "success"
         }]).end();
-    });
-  }
+      });
 
-  function modifiedfilePath(req, opts) {
-    let options = opts || '';
-    return path.join(__dirname, req.path, '/', options).replace('/' + apiVersion + '/', '/');
-  }
+    }
+  }, (reason) => {
+    renderFailStatus(res, 404);
+  });
+}
+
+function modifiedfilePath(req, opts) {
+  let options = opts || '';
+  return path.join(__dirname, req.path, '/', options).replace('/' + apiVersion + '/', '/');
+}
+
+function renderFailStatus(res, code) {
+  res.status(code).json([{
+    "status": "fail"
+  }]).end();
+}
