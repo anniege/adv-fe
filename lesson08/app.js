@@ -17,7 +17,12 @@ let app = express();
 
 let router = (route) => '/api/'+ apiVersion + route;
 
-let commonUrl = ['users', 'posts'];
+let reqHandler = {
+  'get': renderGetRequest,
+  'post': renderPostRequest,
+  'put': renderPutRequest,
+  'delete': renderDeleteRequest
+};
 
 app.set('port', 8080);
 app.listen(app.get('port'), () => {
@@ -32,38 +37,12 @@ app.get('/', (req, res) => {
   res.send('<html><body><h1>My web app http API! Version ' + apiVersion + '</h1></body></html>');
 });
 
-app.all(router('/:common/((:id)?)'), (req, res) => { renderCommonRequest(req, res) });
-
-function renderCommonRequest(req, res) {
+app.all(router('/:common/((:id)?)'), (req, res) => {
   let common = req.params.common;
-  let id = req.params.id;
   let httpMethod = req.method.toLowerCase();
 
-  if (common === 'users' || common === 'posts') {
-    switch (httpMethod) {
-      case 'get':
-      renderGetRequest(req, res);
-      break;
-      case 'post':
-      if (id === undefined) {
-        renderPostRequest(req, res);
-      } else renderFailStatus(res, 405);
-      break;
-      case 'put':
-      renderPutRequest(req, res);
-      break;
-      case 'delete':
-      if (id !== undefined) {
-        renderDeleteRequest(req, res);
-      } else renderFailStatus(res, 405);
-      break;
-      default:
-      renderFailStatus(res, 405);
-    }
-  } else {
-    renderFailStatus(res, 404);
-  }
-}
+  (common === 'users' || common === 'posts') ? reqHandler[httpMethod](req, res)  : renderFailStatus(res, 404);
+});
 
 
 //GET request
@@ -120,6 +99,11 @@ function renderGetRequest(req, res) {
 
 // POST request
 function renderPostRequest(req, res) {
+  if (req.params.id !== undefined) {
+    renderFailStatus(res, 400);
+    return;
+  }
+
   let data = JSON.stringify(req.body);
   let dirPath = (req.params.common === 'users') ? modifiedfilePath(req, req.body.pop().id) : modifiedfilePath(req, req.body.pop().postId);
 
@@ -151,6 +135,12 @@ function renderPostRequest(req, res) {
 
 //PUT request
 function renderPutRequest(req, res) {
+
+  if (req.params.id === undefined) {
+    renderFailStatus(res, 400);
+    return;
+  }
+
   let filePath = modifiedfilePath(req, '/get.json');
   let data = JSON.stringify(req.body);
 
@@ -177,6 +167,11 @@ function renderPutRequest(req, res) {
 
 //DELETE request
 function renderDeleteRequest(req, res) {
+  if (req.params.id === undefined) {
+    renderFailStatus(res, 400);
+    return;
+  }
+
   let dirPath = modifiedfilePath(req);
 
   stat(dirPath).then((stats) => {
@@ -199,9 +194,7 @@ function renderDeleteRequest(req, res) {
 
 
 function modifiedfilePath(req, opts) {
-  console.log(opts);
   let options = opts || '';
-  console.log(options);
   return path.join(__dirname, req.path, '/', options).replace('/' + apiVersion + '/', '/');
 }
 
