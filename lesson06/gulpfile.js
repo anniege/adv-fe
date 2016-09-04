@@ -43,7 +43,6 @@ gulp.task('browserify', function () {
             paths: ['client_src'],
             debug: !gulp.env.production
         }))
-        // .pipe(source('form.js'))
         .pipe(gulp.dest(DEST_DIR + '/js'));
 } );
 
