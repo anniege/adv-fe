@@ -11,6 +11,8 @@ var wrap = require( 'gulp-wrap' );
 var declare = require( 'gulp-declare' );
 var runSequence = require('run-sequence');
 var browserify = require( 'gulp-browserify' );
+var source = require('vinyl-source-stream');
+var transform = require('vinyl-transform');
 
 var DEST_DIR = 'client_build';
 var DEST_LIBS_DIR = DEST_DIR + '/libs';
@@ -27,7 +29,8 @@ gulp.task('dev', ['build'], function (cb) {
 gulp.task('build', function (cb) {
     runSequence(
         'clean-build',
-        'copy-src',
+        'copy-js',
+        'copy-all',
         ['bower', 'browserify', 'templates', 'concat-component-css'],
         cb
     );
@@ -40,12 +43,16 @@ gulp.task('browserify', function () {
             paths: ['client_src'],
             debug: !gulp.env.production
         }))
-        .pipe(gulp.dest(DEST_DIR));
+        // .pipe(source('form.js'))
+        .pipe(gulp.dest(DEST_DIR + '/js'));
 } );
 
-gulp.task('copy-src', function () {
-    return gulp.src(CLIENT_DIR + '/**')
-        .pipe(gulp.dest(DEST_DIR));
+gulp.task('copy-js', function () {
+  return gulp.src(['./client_src/core/*.*']).pipe(gulp.dest(DEST_DIR + '/js'));
+});
+
+gulp.task('copy-all', function () {
+  return gulp.src(['./client_src/*.@(jpg|html)']).pipe(gulp.dest(DEST_DIR));
 });
 
 gulp.task('bower', function() {
@@ -56,7 +63,7 @@ gulp.task('concat-component-css', function () {
     return gulp.src(CLIENT_DIR + '/**/*.css' )
         .pipe(concat('components.css'))
         .pipe(less())
-        .pipe(gulp.dest(DEST_DIR));
+        .pipe(gulp.dest(DEST_DIR + '/css'));
 } );
 
 gulp.task('templates', function() {
@@ -68,7 +75,7 @@ gulp.task('templates', function() {
               noRedeclare: true,
         }))
         .pipe(concat('templates.js'))
-        .pipe(gulp.dest(DEST_DIR));
+        .pipe(gulp.dest(DEST_DIR+ '/js'));
 });
 
 gulp.task('clean-build', function (cb) {
@@ -85,11 +92,3 @@ gulp.task('build-and-reload', ['build'], function () {
     return gulp.src(DEST_DIR + '/**')
         .pipe(livereload());
 });
-
-// Compoment creator
-// gulp.task('component', function () {
-//     ctCreator.create('client_src/components', argv.name);
-// });
-// gulp.task('container', function () {
-//     ctCreator.create('client_src/containers/', argv.name);
-// });

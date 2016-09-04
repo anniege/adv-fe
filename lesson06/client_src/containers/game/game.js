@@ -7,17 +7,23 @@ module.exports = function Game() {
 
     var userGoldResource = new Resource({
         count: 10,
-        name: 'Gold'
+        name: 'Gold',
+        maxCount: 10,
+        minCount: 0
     });
 
     var userCopperResource = new Resource({
         count: 30,
-        name: 'Copper'
+        name: 'Copper',
+        maxCount: 30,
+        minCount: 0
     });
 
     var userSomeResource = new Resource({
         count: 20,
-        name: 'Some'
+        name: 'Some',
+        maxCount: 20,
+        minCount: 0
     });
 
     var userWealth = new UserWealth({
