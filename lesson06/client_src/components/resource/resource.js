@@ -1,9 +1,9 @@
 module.exports = function Resource(options) {
-    var elem = $('<div></div>');
+  var elem = $('<div></div>');
 
-    var model = options.model;
-    var value = model.getCount();
-    var name = model.getName();
+  var model = options.model;
+  var value = model.getCount();
+  var name = model.getName();
 
    model.subscribe(function() {
        value = model.getCount();
