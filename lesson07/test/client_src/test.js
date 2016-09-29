@@ -13,20 +13,17 @@ function getDataJSON(url) {
 
 
 function updateLikesTotal() {
-  getDataJSON(POSTS_PATH)
-  .then((posts) => {
-    let value = posts.reduce((sum, post) => {
-      return sum + post.likeCount;
-    }, 0);
-    $('.likes__count').html(value);
-  });
+  let promise = getDataJSON(POSTS_PATH)
+  .then(posts => posts.reduce((sum, post) => sum + post.likeCount, 0))
+  .then(value => $('.likes__count').html(value));
+  return promise;
 }
 
 
 function updateLikes() {
   let promiselikesUpdate = getDataJSON(POST_PATH).then(({ likeCount }) => {
-    return fetch(POST_PATH,
-      { method: 'PATCH',
+    return fetch(POST_PATH, {
+      method: 'PATCH',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -35,13 +32,14 @@ function updateLikes() {
         "likeCount": ++likeCount
       })
     });
-  });
-  promiselikesUpdate.then((post) => {
-    return post.json()
-  }).then((post) => {
+});
+
+  promiselikesUpdate.then(post => post.json())
+  .then(post => {
     $('.post__likes').html(post.likeCount);
-    updateLikesTotal();
-  }).catch((reason) => {
+    return updateLikesTotal();
+  })
+  .catch(reason => {
     console.log('Error: ', reason)
   });
 }
@@ -49,34 +47,32 @@ function updateLikes() {
 
 function getLikesAndComments() {
   getDataJSON(POST_PATH)
-  .then((post) => {
+  .then(post => {
     $('.post__likes').html(post.likeCount);
     return post;
   })
   .then(({ comments }) => {
     let newComments = [];
 
-    Promise.all(comments.map((comment) => { return getDataJSON(USERS_PATH + comment.user); }))
-    .then((users) => {
-      let newComments =  comments.map((comment) => {
-        let newComment = Object.assign({}, comment, { name: users.filter((user) => {
-          return comment.user == user.id;
-        })[0]['name'] });
+    Promise.all(comments.map(comment => getDataJSON(USERS_PATH + comment.user)))
+    .then(users => {
+      let newComments = comments.map(comment => {
+        let newComment = Object.assign({}, comment, { name: users.filter( user => comment.user == user.id )[0]['name'] });
         delete newComment.user;
         return newComment;
       });
 
-        let template = Handlebars.compile($("#comments-template").html());
-        $('.comments').html(template({ comments: newComments }));
+      let template = Handlebars.compile($("#comments-template").html());
+      $('.comments').html(template({ comments: newComments }));
     });
-  }).catch((reason) => {
+  }).catch(reason => {
     console.log('Error: ', reason)
   });
 }
 
 $(document).ready(function(){
   getLikesAndComments();
-  updateLikesTotal();
+  updateLikesTotal().catch(reason => console.log('Error: ', reason));
 
   $(".post__btn").click(function(){
     updateLikes();
