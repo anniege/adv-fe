@@ -6,7 +6,6 @@ module.exports = function TuneControls(options) {
     function render() {
         elem.html(App.templates['tune-controls']({}));
         subscribeHandlers(elem);
-
         return this;
     }
 

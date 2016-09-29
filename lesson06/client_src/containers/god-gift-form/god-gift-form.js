@@ -1,12 +1,11 @@
 var GiftTunner = require('containers/gift-tunner/gift-tunner.js');
 var GodHateIndicator = require('containers/god-hate-indicator/god-hate-indicator.js');
-// var UserWealth = require('containers/user-wealth/user-wealth.js');
 var Hate = require('model/hate.js');
 var Resource = require('model/resource.js');
 
 module.exports = function GodGiftForm(options) {
     var elem = $('<div></div>');
-    var HATE_BASE = 50;
+    var HATE_BASE = 30;
     var userGoldResource = options.userGoldResource;
     var userCopperResource = options.userCopperResource;
     var userSomeResource = options.userSomeResource;
@@ -16,35 +15,51 @@ module.exports = function GodGiftForm(options) {
     var SOME_MAX = userSomeResource.getCount();
 
     var godPrefer = {
-        'gold': 4,
+        'gold': 3,
         'copper': 2,
         'some': 1
     }
 
     var goldGiftResource = new Resource({
-      name: 'Gold'
+      name: 'Gold',
+      count: 0,
+      minCount: 0,
+      maxCount: GOLD_MAX
     });
 
     var copperGiftResource = new Resource({
-      name: 'Copper'
+      name: 'Copper',
+      count: 0,
+      minCount: 0,
+      maxCount: COPPER_MAX
     });
 
     var someGiftResource = new Resource({
-      name: 'Some'
+      name: 'Some',
+      count: 0,
+      minCount: 0,
+      maxCount: SOME_MAX
     });
 
-    var hate = new Hate(HATE_BASE);
-
-    Model.subscribeAll([goldGiftResource, copperGiftResource, someGiftResource], function() {
-      hate.setCount(HATE_BASE - copperGiftResource.getCount()*godPrefer['copper'] - goldGiftResource.getCount()*godPrefer['gold'] - someGiftResource.getCount()*godPrefer['some']);
-      userGoldResource.setCount(GOLD_MAX - goldGiftResource.getCount());
-      userCopperResource.setCount(COPPER_MAX - copperGiftResource.getCount());
-      userSomeResource.setCount(SOME_MAX - someGiftResource.getCount());
+    var hate = new Hate({
+      count: HATE_BASE,
+      minCount: 0,
+      maxCount: HATE_BASE
     });
 
     var godHateIndicator = new GodHateIndicator({
-        hate: hate
+      hate: hate
     });
+
+    Model.subscribeAll([goldGiftResource, copperGiftResource, someGiftResource], function() {
+        var result = HATE_BASE - copperGiftResource.getCount()*godPrefer['copper'] - goldGiftResource.getCount()*godPrefer['gold'] - someGiftResource.getCount()*godPrefer['some'];
+        hate.setCount(result);
+        userGoldResource.setCount(GOLD_MAX - goldGiftResource.getCount());
+        userCopperResource.setCount(COPPER_MAX - copperGiftResource.getCount());
+        userSomeResource.setCount(SOME_MAX - someGiftResource.getCount());
+    });
+
+
 
     var goldTunner = new GiftTunner({
         resource: goldGiftResource
@@ -55,7 +70,7 @@ module.exports = function GodGiftForm(options) {
     });
 
     var someTunner = new GiftTunner({
-        resource: somerGiftResource
+        resource: someGiftResource
     });
 
 
@@ -68,12 +83,13 @@ module.exports = function GodGiftForm(options) {
         elem.find('.god-gift-form__hate').html(godHateIndicator.render().elem);
 
         subscribeHandlers(elem);
+
         return this;
     }
 
     function subscribeHandlers(elem) {
         elem.find('.god-gift-form__send').click(function() {
-            console.log('send gift [gold: ' + goldTunner.getCount() + ', copper:' + copperTunner.getCount() + ']');
+            console.log('send gift [gold: ' + goldGiftResource.getCount() + ', copper: ' + copperGiftResource.getCount() + ', some: ' + someGiftResource.getCount() + ']');
         });
     }
 

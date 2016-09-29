@@ -9,9 +9,6 @@
         subscribe: function(cb) {
             this.subscribers.push(cb);
         },
-        unsubscribe: function() {
-          this.subscribers.pop();
-        },
         notify: function(cb) {
             this.subscribers.forEach(function(cb) {
                 cb(this);
@@ -28,7 +25,7 @@
             console.log('init');
         }
     };
-    
+
     Model.subscribeAll = function(models, cb) {
         models.forEach(function(model) {
             model.subscribe(cb);

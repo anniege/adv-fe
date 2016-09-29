@@ -35,7 +35,8 @@ module.exports = function Game() {
     var godGiftForm = new GodGiftForm({
         userGoldResource: userGoldResource,
         userCopperResource: userCopperResource,
-        userSomeResource: userSomeResource
+        userSomeResource: userSomeResource,
+        userWealth: userWealth
     });
 
     function render () {

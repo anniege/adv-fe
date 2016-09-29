@@ -1,2 +1,9 @@
+<<<<<<< HEAD
 /**/node_modules
 /**/client_build
+=======
+**/node_modules
+**/libs
+**/client_build
+**/errorShots
+>>>>>>> master
